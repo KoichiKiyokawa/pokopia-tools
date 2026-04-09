@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ぽこあ 味の好み検索</title>
+  <meta name="description" content="ポケモン名から、にがい・すっぱい・からい・あまい・しぶいの好みを検索できるツールです。">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Mochiy+Pop+One&family=Noto+Sans+JP:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <main class="page">
+    <section class="hero">
+      <p class="hero-kicker">ぽこあポケモン</p>
+      <h1>味の好み検索ツール</h1>
+      <p class="hero-copy">
+        ポケモン名から、好きな味だけをすばやく確認できます。
+        図鑑番号順と五十音順の切り替えにも対応しています。
+      </p>
+    </section>
+
+    <section class="panel controls" aria-label="検索条件">
+      <div class="field field-wide">
+        <label for="searchName">ポケモン名で検索</label>
+        <input id="searchName" type="text" placeholder="例: ピカチュウ、ふしぎだね">
+      </div>
+
+      <div class="field">
+        <label for="tasteFilter">味で絞り込み</label>
+        <select id="tasteFilter">
+          <option value="">すべて</option>
+          <option value="にがい">にがい</option>
+          <option value="すっぱい">すっぱい</option>
+          <option value="からい">からい</option>
+          <option value="あまい">あまい</option>
+          <option value="しぶい">しぶい</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="sortOrder">並び順</label>
+        <select id="sortOrder">
+          <option value="dex">図鑑番号順</option>
+          <option value="kana">五十音順</option>
+        </select>
+      </div>
+    </section>
+
+    <section class="panel summary" aria-live="polite">
+      <div>
+        <p class="summary-label">表示件数</p>
+        <p id="resultCount" class="summary-value">0件</p>
+      </div>
+      <div class="taste-legend" aria-label="味の色分け">
+        <span class="taste-pill taste-にがい">にがい</span>
+        <span class="taste-pill taste-すっぱい">すっぱい</span>
+        <span class="taste-pill taste-からい">からい</span>
+        <span class="taste-pill taste-あまい">あまい</span>
+        <span class="taste-pill taste-しぶい">しぶい</span>
+      </div>
+    </section>
+
+    <section>
+      <div id="pokemonGrid" class="pokemon-grid" aria-live="polite"></div>
+      <div id="pagination" class="pagination" aria-label="ページ切り替え"></div>
+    </section>
+
+    <footer class="site-footer">
+      <p>本ツールは個人による非公式のファンプロジェクトです。ポケモン画像および名称の権利は各権利元に帰属します。</p>
+    </footer>
+  </main>
+
+  <script src="./data/pokemon-tastes.js"></script>
+  <script src="./script.js"></script>
+</body>
+</html>
