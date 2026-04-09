@@ -267,6 +267,27 @@ body {
   margin-top: 22px;
 }
 
+.history-heading {
+  margin-top: 22px;
+}
+
+.history-heading[hidden] {
+  display: none;
+}
+
+.history-heading-title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.history-heading-copy {
+  margin: 6px 0 0;
+  color: var(--text-soft);
+  font-size: 0.84rem;
+  line-height: 1.6;
+}
+
 .pokemon-card,
 .empty-state {
   background: rgba(255, 253, 248, 0.92);
@@ -729,6 +750,10 @@ body {
     </section>
 
     <section>
+      <div id="historyHeading" class="history-heading" hidden>
+        <h2 class="history-heading-title">検索履歴から表示中</h2>
+        <p class="history-heading-copy">入力が空のときは、最近検索したポケモンを新しい順で表示しています。</p>
+      </div>
       <div id="pokemonGrid" class="pokemon-grid" aria-live="polite"></div>
       <div id="scrollSentinel" class="scroll-sentinel" aria-hidden="true"></div>
     </section>
@@ -2890,7 +2915,10 @@ const POKEMON_TASTES = [
 const pokemonData = Array.isArray(POKEMON_TASTES) ? POKEMON_TASTES : [];
 
 const ITEMS_PER_PAGE = 24;
+const HISTORY_LIMIT = 100;
+const HISTORY_STORAGE_KEY = "pokopiaRecentPokemonHistory";
 
+const historyHeading = document.getElementById("historyHeading");
 const pokemonGrid = document.getElementById("pokemonGrid");
 const scrollSentinel = document.getElementById("scrollSentinel");
 const relatedSection = document.getElementById("relatedSection");
@@ -2904,6 +2932,7 @@ const heroHelpPop = document.getElementById("heroHelpPop");
 
 let loadedPageCount = 1;
 let scrollObserver;
+let historySaveTimer;
 
 function hiraToKata(text) {
   return text.replace(/[ぁ-ん]/g, (char) => (
@@ -2930,6 +2959,48 @@ function updateClearButton() {
   clearSearchButton.hidden = searchName.value.trim() === "";
 }
 
+function loadRecentHistory() {
+  try {
+    const raw = localStorage.getItem(HISTORY_STORAGE_KEY);
+    if (!raw) {
+      return [];
+    }
+
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveRecentHistory(pokemonList) {
+  if (!searchName.value.trim() || pokemonList.length === 0) {
+    return;
+  }
+
+  const nextIds = pokemonList.map((pokemon) => pokemon.dexNumber);
+  const merged = [...nextIds, ...loadRecentHistory()];
+  const unique = [];
+
+  for (const dexNumber of merged) {
+    if (!unique.includes(dexNumber)) {
+      unique.push(dexNumber);
+    }
+    if (unique.length >= HISTORY_LIMIT) {
+      break;
+    }
+  }
+
+  localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(unique));
+}
+
+function scheduleHistorySave(pokemonList) {
+  clearTimeout(historySaveTimer);
+  historySaveTimer = setTimeout(() => {
+    saveRecentHistory(pokemonList.slice(0, 20));
+  }, 500);
+}
+
 function updateURL() {
   const params = new URLSearchParams();
 
@@ -2952,6 +3023,15 @@ function loadStateFromURL() {
 function getFilteredData() {
   const query = normalizeName(searchName.value);
 
+  if (!query) {
+    const recentIds = loadRecentHistory();
+    const recentPokemon = recentIds
+      .map((dexNumber) => pokemonData.find((pokemon) => pokemon.dexNumber === dexNumber))
+      .filter(Boolean);
+
+    return recentPokemon.slice(0, HISTORY_LIMIT);
+  }
+
   const filtered = pokemonData.filter((pokemon) => {
     const normalizedName = normalizeName(pokemon.name);
     const normalizedBaseName = normalizeName(pokemon.baseName);
@@ -2970,10 +3050,11 @@ function getFilteredData() {
 }
 
 function renderEmptyState() {
+  historyHeading.hidden = true;
   pokemonGrid.innerHTML = `
     <div class="empty-state">
-      <h2>条件に合うポケモンが見つかりませんでした。</h2>
-      <p>検索語や味の条件を変えて、もう一度お試しください。</p>
+      <h2>${searchName.value.trim() ? "条件に合うポケモンが見つかりませんでした。" : "検索履歴がまだありません。"}</h2>
+      <p>${searchName.value.trim() ? "検索語を変えて、もう一度お試しください。" : "ポケモン名を検索すると、ここに直近の結果が表示されます。"}</p>
     </div>
   `;
   relatedSection.hidden = true;
@@ -3104,6 +3185,7 @@ function render() {
   const filtered = getFilteredData();
   const totalItems = filtered.length;
   const totalPages = Math.max(1, Math.ceil(totalItems / ITEMS_PER_PAGE));
+  const isHistoryMode = !searchName.value.trim();
 
   loadedPageCount = Math.min(loadedPageCount, totalPages);
 
@@ -3117,6 +3199,11 @@ function render() {
   const visibleCount = loadedPageCount * ITEMS_PER_PAGE;
   const pageItems = filtered.slice(0, visibleCount);
 
+  if (searchName.value.trim()) {
+    scheduleHistorySave(filtered);
+  }
+
+  historyHeading.hidden = !isHistoryMode;
   renderCards(pageItems);
   renderRelatedPokemon(filtered);
   setupInfiniteScroll(totalItems);
@@ -3125,6 +3212,9 @@ function render() {
 
 function resetAndRender() {
   loadedPageCount = 1;
+  if (!searchName.value.trim()) {
+    clearTimeout(historySaveTimer);
+  }
   updateClearButton();
   render();
 }
