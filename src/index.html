@@ -2920,6 +2920,7 @@ const pokemonData = Array.isArray(POKEMON_TASTES) ? POKEMON_TASTES : [];
 const ITEMS_PER_PAGE = 24;
 const HISTORY_LIMIT = 100;
 const HISTORY_STORAGE_KEY = "pokopiaRecentPokemonHistory";
+const SEARCH_DEBOUNCE_MS = 180;
 
 const historyHeading = document.getElementById("historyHeading");
 const pokemonGrid = document.getElementById("pokemonGrid");
@@ -2936,6 +2937,7 @@ const heroHelpPop = document.getElementById("heroHelpPop");
 let loadedPageCount = 1;
 let scrollObserver;
 let historySaveTimer;
+let searchDebounceTimer;
 
 function hiraToKata(text) {
   return text.replace(/[ぁ-ん]/g, (char) => (
@@ -3222,6 +3224,14 @@ function resetAndRender() {
   render();
 }
 
+function scheduleSearchRender() {
+  updateClearButton();
+  clearTimeout(searchDebounceTimer);
+  searchDebounceTimer = setTimeout(() => {
+    resetAndRender();
+  }, SEARCH_DEBOUNCE_MS);
+}
+
 function closeHelpPop() {
   heroHelpPop.hidden = true;
   heroHelpButton.setAttribute("aria-expanded", "false");
@@ -3247,8 +3257,9 @@ function toggleRelatedHelpPop() {
 loadStateFromURL();
 updateClearButton();
 
-searchName.addEventListener("input", resetAndRender);
+searchName.addEventListener("input", scheduleSearchRender);
 clearSearchButton.addEventListener("click", () => {
+  clearTimeout(searchDebounceTimer);
   searchName.value = "";
   searchName.focus();
   resetAndRender();
