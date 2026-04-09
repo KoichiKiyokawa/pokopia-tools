@@ -543,20 +543,21 @@ body {
 @media (max-width: 640px) {
   .page {
     width: min(100% - 20px, 1120px);
-    padding-top: 24px;
+    padding-top: 10px;
   }
 
   .hero {
-    padding-bottom: 20px;
+    padding: 4px 0 16px;
   }
 
   .hero-title-row {
     gap: 10px;
+    align-items: flex-start;
   }
 
   .hero-actions {
-    top: 4px;
-    right: 0;
+    top: -10px;
+    right: -10px;
   }
 
   .hero-help {
@@ -566,12 +567,14 @@ body {
 
   .hero-github-link {
     width: 34px;
-    height: 34px;
+    height: 30px;
+    border-radius: 0 0 0 12px;
+    box-shadow: 0 6px 14px rgba(58, 42, 28, 0.16);
   }
 
   .hero-github-link svg {
-    width: 16px;
-    height: 16px;
+    width: 15px;
+    height: 15px;
   }
 
   .hero-help-pop {
