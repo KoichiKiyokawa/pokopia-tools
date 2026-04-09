@@ -1057,6 +1057,13 @@ window.POKEMON_TASTES = [
     "iconUrl": "https://img.game8.jp/2216498/0eaf6ee5e2a84e8ad4f54887abd4a811.png/show"
   },
   {
+    "dexNumber": 257,
+    "name": "バシャーモ",
+    "baseName": "バシャーモ",
+    "taste": "からい",
+    "iconUrl": "https://img.game8.jp/2216509/39f87d3b73ad79859cb26dd03da4767e.png/show"
+  },
+  {
     "dexNumber": 270,
     "name": "ハスボー",
     "baseName": "ハスボー",

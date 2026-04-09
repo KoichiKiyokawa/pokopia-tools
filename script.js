@@ -5,9 +5,7 @@ const collator = new Intl.Collator("ja");
 
 const pokemonGrid = document.getElementById("pokemonGrid");
 const pagination = document.getElementById("pagination");
-const resultCount = document.getElementById("resultCount");
 const searchName = document.getElementById("searchName");
-const tasteFilter = document.getElementById("tasteFilter");
 const sortOrder = document.getElementById("sortOrder");
 
 let currentPage = 1;
@@ -40,10 +38,6 @@ function updateURL() {
     params.set("q", searchName.value.trim());
   }
 
-  if (tasteFilter.value) {
-    params.set("taste", tasteFilter.value);
-  }
-
   if (sortOrder.value !== "dex") {
     params.set("sort", sortOrder.value);
   }
@@ -63,10 +57,6 @@ function loadStateFromURL() {
     searchName.value = params.get("q");
   }
 
-  if (params.has("taste")) {
-    tasteFilter.value = params.get("taste");
-  }
-
   if (params.has("sort")) {
     sortOrder.value = params.get("sort");
   }
@@ -78,7 +68,6 @@ function loadStateFromURL() {
 
 function getFilteredData() {
   const query = normalizeName(searchName.value);
-  const selectedTaste = tasteFilter.value;
 
   const filtered = pokemonData.filter((pokemon) => {
     const normalizedName = normalizeName(pokemon.name);
@@ -86,8 +75,7 @@ function getFilteredData() {
     const matchesName = !query
       || normalizedName.includes(query)
       || normalizedBaseName.includes(query);
-    const matchesTaste = !selectedTaste || pokemon.taste === selectedTaste;
-    return matchesName && matchesTaste;
+    return matchesName;
   });
 
   if (sortOrder.value === "kana") {
@@ -164,23 +152,29 @@ function renderCards(pokemonList) {
     const card = document.createElement("article");
     card.className = "pokemon-card";
     card.innerHTML = `
-      <div class="card-head">
-        <div>
-          <p class="card-number">${formatDexNumber(pokemon.dexNumber)}</p>
-          <h2 class="card-name">${pokemon.name}</h2>
-        </div>
+      <div class="card-main">
         <div class="card-icon-wrap">
           <img
             class="card-icon"
             src="${pokemon.iconUrl}"
             alt="${pokemon.name} のアイコン"
             loading="lazy"
-            width="72"
-            height="72"
+            width="60"
+            height="60"
           >
         </div>
+        <div class="card-body">
+          <p class="card-number">${formatDexNumber(pokemon.dexNumber)}</p>
+          <div class="card-row">
+            <h2 class="card-name">${pokemon.name}</h2>
+            <div class="card-footer">
+              <p class="taste-caption">好きな味</p>
+              <span class="taste-pill ${getTasteClass(pokemon.taste)}">${pokemon.taste}</span>
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="card-footer">
+      <div class="card-footer-mobile">
         <div>
           <p class="taste-caption">好きな味</p>
           <span class="taste-pill ${getTasteClass(pokemon.taste)}">${pokemon.taste}</span>
@@ -199,8 +193,6 @@ function render() {
   if (currentPage > totalPages) {
     currentPage = totalPages;
   }
-
-  resultCount.textContent = `${totalItems}件`;
 
   if (totalItems === 0) {
     renderEmptyState();
@@ -224,7 +216,6 @@ function resetAndRender() {
 loadStateFromURL();
 
 searchName.addEventListener("input", resetAndRender);
-tasteFilter.addEventListener("change", resetAndRender);
 sortOrder.addEventListener("change", resetAndRender);
 
 render();
