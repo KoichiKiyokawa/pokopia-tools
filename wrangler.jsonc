@@ -1,6 +1,8 @@
 {
   "name": "pokopia-tools",
   "compatibility_date": "2026-04-10",
+  "workers_dev": false,
+  "preview_urls": false,
   "assets": {
     "directory": "./src"
   }
