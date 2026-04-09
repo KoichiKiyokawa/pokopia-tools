@@ -2920,10 +2920,6 @@ function updateURL() {
     params.set("q", searchName.value.trim());
   }
 
-  if (loadedPageCount > 1) {
-    params.set("page", String(loadedPageCount));
-  }
-
   const nextURL = `${window.location.pathname}${params.toString() ? `?${params}` : ""}`;
   window.history.replaceState(null, "", nextURL);
 }
@@ -2933,10 +2929,6 @@ function loadStateFromURL() {
 
   if (params.has("q")) {
     searchName.value = params.get("q");
-  }
-
-  if (params.has("page")) {
-    loadedPageCount = Math.max(1, Number.parseInt(params.get("page"), 10) || 1);
   }
 }
 
