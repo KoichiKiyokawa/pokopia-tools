@@ -298,6 +298,7 @@ body {
 
 .pokemon-card {
   padding: 12px 14px;
+  cursor: pointer;
   transition: transform 0.24s ease, box-shadow 0.24s ease, border-color 0.24s ease;
 }
 
@@ -305,6 +306,12 @@ body {
   transform: translateY(-2px);
   border-color: rgba(219, 119, 33, 0.34);
   box-shadow: 0 14px 28px rgba(123, 76, 31, 0.11);
+}
+
+.pokemon-card:focus-visible,
+.related-card:focus-visible {
+  outline: 3px solid rgba(219, 119, 33, 0.45);
+  outline-offset: 3px;
 }
 
 .card-main {
@@ -466,6 +473,7 @@ body {
   border-radius: 16px;
   background: rgba(255, 253, 248, 0.92);
   box-shadow: 0 10px 24px rgba(123, 76, 31, 0.08);
+  cursor: pointer;
 }
 
 .related-icon-wrap {
@@ -3080,6 +3088,31 @@ function renderEmptyState() {
   relatedGrid.innerHTML = "";
 }
 
+function selectPokemonName(name) {
+  clearTimeout(searchDebounceTimer);
+  searchName.value = name;
+  searchName.focus();
+  searchName.setSelectionRange(name.length, name.length);
+  resetAndRender();
+}
+
+function bindPokemonSelection(element, name) {
+  element.tabIndex = 0;
+  element.setAttribute("role", "button");
+  element.setAttribute("aria-label", `${name} を入力欄に入れて検索`);
+  element.addEventListener("click", () => {
+    selectPokemonName(name);
+  });
+  element.addEventListener("keydown", (event) => {
+    if (event.key !== "Enter" && event.key !== " ") {
+      return;
+    }
+
+    event.preventDefault();
+    selectPokemonName(name);
+  });
+}
+
 function renderCards(pokemonList) {
   pokemonGrid.innerHTML = "";
 
@@ -3116,6 +3149,7 @@ function renderCards(pokemonList) {
         </div>
       </div>
     `;
+    bindPokemonSelection(card, pokemon.name);
     pokemonGrid.appendChild(card);
   }
 }
@@ -3169,6 +3203,7 @@ function renderRelatedPokemon(filtered) {
         </div>
       </div>
     `;
+    bindPokemonSelection(card, pokemon.name);
     relatedGrid.appendChild(card);
   }
 }
