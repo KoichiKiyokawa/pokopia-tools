@@ -3091,8 +3091,9 @@ function renderEmptyState() {
 function selectPokemonName(name) {
   clearTimeout(searchDebounceTimer);
   searchName.value = name;
-  searchName.focus();
-  searchName.setSelectionRange(name.length, name.length);
+  if (document.activeElement instanceof HTMLElement) {
+    document.activeElement.blur();
+  }
   resetAndRender();
 }
 
