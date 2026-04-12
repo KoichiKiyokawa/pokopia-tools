@@ -2986,6 +2986,19 @@ function updateClearButton() {
   clearSearchButton.hidden = searchName.value.trim() === "";
 }
 
+function isEditableElement(element) {
+  return element instanceof HTMLInputElement
+    || element instanceof HTMLTextAreaElement
+    || element instanceof HTMLSelectElement
+    || (element instanceof HTMLElement && element.isContentEditable);
+}
+
+function focusSearchField() {
+  searchName.focus();
+  const cursorPosition = searchName.value.length;
+  searchName.setSelectionRange(cursorPosition, cursorPosition);
+}
+
 function loadRecentHistory() {
   try {
     const raw = localStorage.getItem(HISTORY_STORAGE_KEY);
@@ -3304,6 +3317,23 @@ function toggleRelatedHelpPop() {
   relatedHelpButton.setAttribute("aria-expanded", willOpen ? "true" : "false");
 }
 
+function handleGlobalSearchShortcut(event) {
+  if (event.isComposing || event.altKey || event.ctrlKey || event.metaKey) {
+    return;
+  }
+
+  if (event.key !== "/" && event.key !== "・") {
+    return;
+  }
+
+  if (isEditableElement(document.activeElement)) {
+    return;
+  }
+
+  event.preventDefault();
+  focusSearchField();
+}
+
 loadStateFromURL();
 updateClearButton();
 
@@ -3311,7 +3341,7 @@ searchName.addEventListener("input", scheduleSearchRender);
 clearSearchButton.addEventListener("click", () => {
   clearTimeout(searchDebounceTimer);
   searchName.value = "";
-  searchName.focus();
+  focusSearchField();
   resetAndRender();
 });
 heroHelpButton.addEventListener("click", (event) => {
@@ -3330,6 +3360,7 @@ document.addEventListener("click", (event) => {
     closeRelatedHelpPop();
   }
 });
+document.addEventListener("keydown", handleGlobalSearchShortcut);
 
 render();
   </script>
